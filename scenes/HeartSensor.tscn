@@ -13,7 +13,6 @@ target_dot_scene = ExtResource( 1 )
 dot_parent_node_path = NodePath("SensorBackgroundSprite")
 scanner_width = 10.0
 scanner_height = 10.0
-test_target_speed = 1
 
 [node name="SensorBackgroundSprite" type="Sprite" parent="."]
 position = Vector2( 640, 617 )
