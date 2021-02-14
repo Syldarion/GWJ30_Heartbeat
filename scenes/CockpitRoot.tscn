@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://scenes/TargetDot.tscn" type="PackedScene" id=1]
+[ext_resource path="res://sprites/Cockpit_Mockup.png" type="Texture" id=2]
+[ext_resource path="res://scripts/heart_sensor.gd" type="Script" id=3]
+
+[node name="CockpitRoot" type="Node2D"]
+
+[node name="Sprite" type="Sprite" parent="."]
+texture = ExtResource( 2 )
+offset = Vector2( 960, 540 )
+
+[node name="HeartSensor" type="Node2D" parent="."]
+position = Vector2( 960, 800 )
+script = ExtResource( 3 )
+target_dot_scene = ExtResource( 1 )
+dot_parent_node_path = NodePath(".")
+scanner_pixel_width = 420.0
+scanner_pixel_height = 340.0
+test_target_speed = 1

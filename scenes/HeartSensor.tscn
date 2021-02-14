@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://scenes/TargetDot.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scripts/heart_sensor.gd" type="Script" id=3]
+
+[sub_resource type="NoiseTexture" id=1]
+width = 360
+height = 206
+
+[node name="SensorRoot" type="Node2D"]
+script = ExtResource( 3 )
+target_dot_scene = ExtResource( 1 )
+dot_parent_node_path = NodePath("SensorBackgroundSprite")
+scanner_width = 10.0
+scanner_height = 10.0
+test_target_speed = 1
+
+[node name="SensorBackgroundSprite" type="Sprite" parent="."]
+position = Vector2( 640, 617 )
+texture = SubResource( 1 )
