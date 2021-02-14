@@ -1,24 +1,69 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://scenes/TargetDot.tscn" type="PackedScene" id=1]
 [ext_resource path="res://sprites/Cockpit_Mockup.png" type="Texture" id=2]
 [ext_resource path="res://scripts/heart_sensor.gd" type="Script" id=3]
 [ext_resource path="res://scripts/cockpit.gd" type="Script" id=4]
+[ext_resource path="res://scripts/impulse_camera.gd" type="Script" id=5]
+[ext_resource path="res://fonts/officecodepro_regular_panel.tres" type="DynamicFont" id=6]
+[ext_resource path="res://sprites/Cockpit_Radar_Overlay.png" type="Texture" id=7]
 
 [node name="CockpitRoot" type="Node2D"]
 script = ExtResource( 4 )
 heartbeat_sensor_node_path = NodePath("HeartSensor")
-turn_speed = 90.0
-viewing_angle = 40.0
+camera_node_path = NodePath("Camera2D")
+heading_label_path = NodePath("HeartSensor/SensorHeadingLabel")
+location_label_path = NodePath("HeartSensor/SensorLocationLabel")
+backward_speed = 0.5
+turn_speed = 45.0
+viewing_angle = 35.0
 
 [node name="Sprite" type="Sprite" parent="."]
 texture = ExtResource( 2 )
-offset = Vector2( 960, 540 )
+
+[node name="Sprite" type="Sprite" parent="Sprite"]
+texture = ExtResource( 7 )
 
 [node name="HeartSensor" type="Node2D" parent="."]
-position = Vector2( 960, 800 )
+position = Vector2( 0, 440 )
 script = ExtResource( 3 )
 target_dot_scene = ExtResource( 1 )
 dot_parent_node_path = NodePath(".")
 scanner_pixel_width = 420.0
 scanner_pixel_height = 340.0
+
+[node name="SensorHeadingLabel" type="Label" parent="HeartSensor"]
+margin_left = 15.0
+margin_top = -360.0
+margin_right = 215.0
+margin_bottom = -315.0
+custom_fonts/font = ExtResource( 6 )
+custom_colors/font_color = Color( 0, 1, 0, 1 )
+text = "360deg"
+align = 2
+valign = 1
+uppercase = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SensorLocationLabel" type="Label" parent="HeartSensor"]
+margin_left = -210.0
+margin_top = -360.0
+margin_right = 4.99997
+margin_bottom = -315.0
+custom_fonts/font = ExtResource( 6 )
+custom_colors/font_color = Color( 0, 1, 0, 1 )
+text = "[0, 0]"
+valign = 1
+uppercase = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Camera2D" type="Camera2D" parent="."]
+current = true
+script = ExtResource( 5 )
+decay = 0.9
+max_offset = Vector2( 0, 90 )
+max_impulse = 0.8

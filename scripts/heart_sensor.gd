@@ -22,13 +22,20 @@ func _process(delta):
 	# update_target_dots()
 	pass
 
-func update_target(target: SensorTarget, position, visible):
-	if not visible:
-		target_dots[target.target_name].hide()
-		return
+func update_target(target: SensorTarget, position):
+	var converted = convert_target_location(position)
+	var half_w = scanner_pixel_width / 2
 	
-	target_dots[target.target_name].show()
-	target_dots[target.target_name].position = convert_target_location(position)
+	# 32 is the size of the target dot, oh noooo, magic number
+	var outside_y = converted.y > -32 or converted.y < (-scanner_pixel_height + 32)
+	var outside_x = converted.x > (half_w - 32) or converted.x < (-half_w + 32)
+	
+	if outside_y or outside_x:
+		target_dots[target.target_name].hide()
+	else:
+		target_dots[target.target_name].show()
+	
+	target_dots[target.target_name].position = converted
 
 func update_target_dots():
 	for target_name in targets:
@@ -36,7 +43,7 @@ func update_target_dots():
 
 func convert_target_location(location: Vector2) -> Vector2:
 	var x = location.x * (scanner_pixel_width / scanner_width)
-	var y = location.y * (scanner_pixel_height / scanner_height) + (scanner_pixel_height / 2)
+	var y = location.y * (scanner_pixel_height / scanner_height)
 	return Vector2(x, y)
 	
 func add_target(target: SensorTarget):
