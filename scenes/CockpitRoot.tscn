@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://scenes/TargetDot.tscn" type="PackedScene" id=1]
 [ext_resource path="res://sprites/Cockpit_Mockup.png" type="Texture" id=2]
@@ -7,6 +7,17 @@
 [ext_resource path="res://scripts/impulse_camera.gd" type="Script" id=5]
 [ext_resource path="res://fonts/officecodepro_regular_panel.tres" type="DynamicFont" id=6]
 [ext_resource path="res://sprites/Cockpit_Radar_Overlay.png" type="Texture" id=7]
+[ext_resource path="res://sprites/SensorDot.png" type="Texture" id=8]
+[ext_resource path="res://materials/sensor_dot_inactive_mat.tres" type="Material" id=9]
+[ext_resource path="res://materials/sensor_dot_material.tres" type="Material" id=10]
+[ext_resource path="res://scripts/weapon_status.gd" type="Script" id=11]
+[ext_resource path="res://scripts/comms_panel.gd" type="Script" id=12]
+[ext_resource path="res://scenes/PilotResponse.tscn" type="PackedScene" id=13]
+[ext_resource path="res://scenes/CommsMessage.tscn" type="PackedScene" id=14]
+
+[sub_resource type="NoiseTexture" id=1]
+width = 800
+height = 400
 
 [node name="CockpitRoot" type="Node2D"]
 script = ExtResource( 4 )
@@ -14,11 +25,14 @@ heartbeat_sensor_node_path = NodePath("HeartSensor")
 camera_node_path = NodePath("Camera2D")
 heading_label_path = NodePath("HeartSensor/SensorHeadingLabel")
 location_label_path = NodePath("HeartSensor/SensorLocationLabel")
+weapon_status_path = NodePath("WeaponStatusGroup")
+comms_panel_path = NodePath("CommsPanel")
 backward_speed = 0.5
 turn_speed = 45.0
 viewing_angle = 35.0
 
 [node name="Sprite" type="Sprite" parent="."]
+position = Vector2( 0.707031, 0 )
 texture = ExtResource( 2 )
 
 [node name="Sprite" type="Sprite" parent="Sprite"]
@@ -67,3 +81,153 @@ script = ExtResource( 5 )
 decay = 0.9
 max_offset = Vector2( 0, 90 )
 max_impulse = 0.8
+
+[node name="WeaponStatusGroup" type="Node2D" parent="."]
+script = ExtResource( 11 )
+loader_status_path = NodePath("LoaderStatusSprite")
+empty_shell_path = NodePath("EmptyShellSprite")
+ammo_loaded_path = NodePath("AmmoLoadedSprite")
+active_mat = ExtResource( 10 )
+inactive_mat = ExtResource( 9 )
+
+[node name="LoaderStatusSprite" type="Sprite" parent="WeaponStatusGroup"]
+material = ExtResource( 9 )
+position = Vector2( 340, 150 )
+rotation = 0.174533
+scale = Vector2( 1.15, 1 )
+texture = ExtResource( 8 )
+
+[node name="Label" type="Label" parent="WeaponStatusGroup/LoaderStatusSprite"]
+margin_left = 20.9337
+margin_top = -7.2153
+margin_right = 105.934
+margin_bottom = 6.7847
+text = "Loader Extended"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EmptyShellSprite" type="Sprite" parent="WeaponStatusGroup"]
+material = ExtResource( 9 )
+position = Vector2( 340, 190 )
+rotation = 0.174533
+scale = Vector2( 1.15, 1 )
+texture = ExtResource( 8 )
+
+[node name="Label" type="Label" parent="WeaponStatusGroup/EmptyShellSprite"]
+margin_left = 20.7652
+margin_top = -6.60713
+margin_right = 100.765
+margin_bottom = 7.39287
+text = "Shell Packed"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AmmoLoadedSprite" type="Sprite" parent="WeaponStatusGroup"]
+material = ExtResource( 9 )
+position = Vector2( 337.496, 230.135 )
+rotation = 0.174533
+scale = Vector2( 1.15, 1 )
+texture = ExtResource( 8 )
+
+[node name="Label" type="Label" parent="WeaponStatusGroup/AmmoLoadedSprite"]
+margin_left = 21.0012
+margin_top = -5.89922
+margin_right = 102.001
+margin_bottom = 8.10078
+text = "Shell Loaded"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CommsPanel" type="Sprite" parent="."]
+position = Vector2( -0.594601, -271.352 )
+texture = SubResource( 1 )
+region_rect = Rect2( 0, 0, 1000, 1000 )
+script = ExtResource( 12 )
+comms_message_scene = ExtResource( 14 )
+pilot_response_scene = ExtResource( 13 )
+comms_parent_path = NodePath("PanelContainer/VSplitContainer/ScrollContainer/VBoxContainer")
+comms_scroll_box_path = NodePath("PanelContainer/VSplitContainer/ScrollContainer")
+
+[node name="CommsText" type="Label" parent="CommsPanel"]
+visible = false
+margin_left = -398.0
+margin_top = -198.0
+margin_right = 397.0
+margin_bottom = 197.0
+custom_fonts/font = ExtResource( 6 )
+custom_colors/font_color = Color( 0, 1, 0, 1 )
+text = "This is a test line
+Test line two"
+align = 2
+valign = 2
+autowrap = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PanelContainer" type="PanelContainer" parent="CommsPanel"]
+margin_left = -400.0
+margin_top = -200.0
+margin_right = 400.0
+margin_bottom = 200.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VSplitContainer" type="VBoxContainer" parent="CommsPanel/PanelContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 793.0
+margin_bottom = 393.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CommsPanel/PanelContainer/VSplitContainer"]
+margin_right = 786.0
+margin_bottom = 334.0
+rect_min_size = Vector2( 0, 325 )
+size_flags_vertical = 3
+scroll_horizontal_enabled = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CommsPanel/PanelContainer/VSplitContainer/ScrollContainer"]
+margin_right = 786.0
+margin_bottom = 334.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 2
+
+[node name="CommsMessage" parent="CommsPanel/PanelContainer/VSplitContainer/ScrollContainer/VBoxContainer" instance=ExtResource( 14 )]
+margin_top = 228.0
+margin_bottom = 279.0
+
+[node name="PilotResponse" parent="CommsPanel/PanelContainer/VSplitContainer/ScrollContainer/VBoxContainer" instance=ExtResource( 13 )]
+margin_top = 283.0
+margin_bottom = 334.0
+
+[node name="HSeparator" type="HSeparator" parent="CommsPanel/PanelContainer/VSplitContainer"]
+margin_top = 338.0
+margin_right = 786.0
+margin_bottom = 342.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CommsPanel/PanelContainer/VSplitContainer"]
+margin_top = 346.0
+margin_right = 786.0
+margin_bottom = 386.0
+rect_min_size = Vector2( 0, 40 )
+custom_constants/separation = 12
+alignment = 2
+
+[node name="Button" type="Button" parent="CommsPanel/PanelContainer/VSplitContainer/HBoxContainer"]
+margin_left = 680.0
+margin_right = 734.0
+margin_bottom = 40.0
+custom_fonts/font = ExtResource( 6 )
+text = "Yes"
+
+[node name="Button2" type="Button" parent="CommsPanel/PanelContainer/VSplitContainer/HBoxContainer"]
+margin_left = 746.0
+margin_right = 786.0
+margin_bottom = 40.0
+custom_fonts/font = ExtResource( 6 )
+text = "No"

@@ -1,0 +1,50 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://sprites/SensorDot.png" type="Texture" id=1]
+[ext_resource path="res://scripts/comms_message.gd" type="Script" id=2]
+[ext_resource path="res://fonts/officecodepro_regular_panel.tres" type="DynamicFont" id=3]
+[ext_resource path="res://fonts/officecodepro_regular_half.tres" type="DynamicFont" id=4]
+
+[node name="PilotResponse" type="HBoxContainer"]
+margin_right = 786.0
+margin_bottom = 51.0
+size_flags_horizontal = 3
+alignment = 2
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+message_icon_path = NodePath("TextureRect")
+name_label_path = NodePath("VBoxContainer/Name")
+message_label_path = NodePath("VBoxContainer/Label")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+margin_left = 476.0
+margin_right = 742.0
+margin_bottom = 51.0
+
+[node name="Name" type="Label" parent="VBoxContainer"]
+margin_right = 266.0
+margin_bottom = 16.0
+custom_fonts/font = ExtResource( 4 )
+text = "Pilot"
+align = 2
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+margin_top = 20.0
+margin_right = 266.0
+margin_bottom = 51.0
+custom_fonts/font = ExtResource( 3 )
+text = "This is a response."
+align = 2
+
+[node name="VSeparator" type="VSeparator" parent="."]
+margin_left = 746.0
+margin_right = 750.0
+margin_bottom = 51.0
+
+[node name="TextureRect" type="TextureRect" parent="."]
+margin_left = 754.0
+margin_right = 786.0
+margin_bottom = 51.0
+texture = ExtResource( 1 )

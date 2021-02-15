@@ -4,6 +4,8 @@ export(NodePath) var heartbeat_sensor_node_path
 export(NodePath) var camera_node_path
 export(NodePath) var heading_label_path
 export(NodePath) var location_label_path
+export(NodePath) var weapon_status_path
+export(NodePath) var comms_panel_path
 
 export var forward_speed = 1.0
 export var backward_speed = 1.0
@@ -16,6 +18,8 @@ onready var heartbeat_sensor = get_node(heartbeat_sensor_node_path) as HeartSens
 onready var impulse_camera = get_node(camera_node_path) as ImpulseCamera
 onready var heading_label = get_node(heading_label_path) as Label
 onready var location_label = get_node(location_label_path) as Label
+onready var weapon_status = get_node(weapon_status_path) as WeaponStatus
+onready var comms_panel = get_node(comms_panel_path) as CommsPanel
 
 var level_position = Vector2(0.0, 0.0)
 var rotation = 0.0
@@ -28,7 +32,7 @@ var seconds_between_step_impulse = 0.5
 # then the pilot retracts the loader, removes the empty shell
 # loads a new shell, and pushes the loader back into place
 var ammo_loaded = false
-var shell_empty = false
+var shell_empty = true
 var loader_retracted = true
 
 var active_targets = {}
@@ -76,37 +80,76 @@ func _process(delta):
 	
 	heading_label.text = "%dDEG" % fmod(rad2deg(rotation), 360.0)
 	location_label.text = "[%5.1f,%5.1f]" % [level_position.x, level_position.y]
+	
+	weapon_status.update_status(loader_retracted, shell_empty, ammo_loaded)
+
+func _input(event):
+	if event.is_action_pressed("toggle_loader"):
+		toggle_loader()
+	elif event.is_action_pressed("load_shell"):
+		if event.shift:
+			unload_shell()
+		else:
+			load_shell()
+	elif event.is_action_pressed("fire_shell"):
+		fire_shell()
 
 func load_shell():
-	if ammo_loaded or !loader_retracted:
+	if ammo_loaded:
+		comms_panel.add_line("The Mech", "Cannot load: Ammo already loaded")
 		return
-
+	
+	if !loader_retracted:
+		comms_panel.add_line("The Mech", "Cannot load: Loader is extended")
+		return
+		
+	comms_panel.add_line("The Mech", "Loading shell...")
 	ammo_loaded = true
 	shell_empty = false
 	
 func unload_shell():
-	if !ammo_loaded or !loader_retracted:
+	if !ammo_loaded:
+		comms_panel.add_line("The Mech", "Cannot unload: No ammo is loaded")
 		return
 	
+	if !loader_retracted:
+		comms_panel.add_line("The Mech", "Cannot unload: Loader is extended")
+		return
+	
+	comms_panel.add_line("The Mech", "Unloading shell...")
 	ammo_loaded = false
+	shell_empty = true
 	
 func fire_shell():
-	if !ammo_loaded or shell_empty or loader_retracted:
+	if !ammo_loaded:
+		comms_panel.add_line("The Mech", "Cannot fire: No ammo is loaded")
 		return
 	
-	shell_empty = true
-
-func retract_loader():
+	if shell_empty:
+		comms_panel.add_line("The Mech", "Cannot fire: Shell is empty")
+		return
+	
 	if loader_retracted:
+		comms_panel.add_line("The Mech", "Cannot fire: Loader is retracted")
 		return
 	
-	loader_retracted = true
+	comms_panel.add_line("The Mech", "Firing...")
+	shell_empty = true
+	
+	var closest_target = get_closest_target_in_view()
+	if closest_target == null:
+		return
+	
+	heartbeat_sensor.remove_target(closest_target)
+	active_targets.erase(closest_target.target_name)
 
-func extend_loader():
-	if !loader_retracted:
-		return
+func toggle_loader():
+	if loader_retracted:
+		comms_panel.add_line("The Mech", "Extending loader...")
+	else:
+		comms_panel.add_line("The Mech", "Retracting loader...")
 	
-	loader_retracted = false
+	loader_retracted = !loader_retracted
 
 func rotate_mech(direction, delta):
 	if last_step_impulse > seconds_between_step_impulse:
@@ -136,3 +179,24 @@ func point_in_vision(point: Vector2) -> bool:
 	var polar = cartesian2polar(local.x, local.y)
 	
 	return polar.y >= deg2rad(-viewing_angle) and polar.y <= deg2rad(viewing_angle) and polar.x <= sensor_distance
+
+func get_closest_target_in_view():
+	if active_targets.size() == 0:
+		return null
+	
+	var closest_target = null
+	var closest_distance = INF
+	
+	for target in active_targets:
+		var pos = active_targets[target].target_location
+		var local = convert_world_to_local(pos)
+		var polar = cartesian2polar(local.x, local.y)
+		
+		if abs(polar.y) > deg2rad(viewing_angle):
+			continue
+		
+		if polar.x < closest_distance:
+			closest_target = active_targets[target]
+			closest_distance = polar.x
+	
+	return closest_target
