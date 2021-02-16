@@ -8,6 +8,7 @@ var level_targets = []
 
 var cockpit_ref
 var comms_ref
+var manager_ref
 
 func _init():
 	level_name = "NONE"

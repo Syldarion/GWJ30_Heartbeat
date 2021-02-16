@@ -147,7 +147,6 @@ response_scene = ExtResource( 15 )
 comms_parent_path = NodePath("PanelContainer/VSplitContainer/ScrollContainer/VBoxContainer")
 comms_scroll_box_path = NodePath("PanelContainer/VSplitContainer/ScrollContainer")
 response_parent_path = NodePath("PanelContainer/VSplitContainer/HBoxContainer")
-time_between_messages = 1.0
 
 [node name="PanelContainer" type="PanelContainer" parent="CommsPanel"]
 margin_left = -400.0

@@ -14,4 +14,5 @@ func load_level(level_script_path):
 	var cockpit_node = SceneLoader.current_scene
 	var comms_node = SceneLoader.current_scene.find_node("CommsPanel")
 	loaded_level.setup_references(cockpit_node, comms_node)
+	loaded_level.manager_ref = self
 	loaded_level.run_level_script()

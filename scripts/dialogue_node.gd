@@ -1,6 +1,7 @@
 class_name DialogueNode
-
 extends Resource
+
+signal node_completed(linked_node)
 
 export(Array, Resource) var lines
 export(Array, Resource) var links
@@ -31,3 +32,6 @@ func corrupt_line(line: DialogueLine, speaker, new_line):
 
 func clean_line(line: DialogueLine):
 	pass
+
+func complete_node(link):
+	emit_signal("node_completed", link.next_node)

@@ -10,5 +10,5 @@ func _init(lt="", nn=null):
 	link_text = lt
 	next_node = nn
 
-func select_link():
+func _on_Response_Button_selected(button):
 	emit_signal("link_selected")
