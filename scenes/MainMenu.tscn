@@ -69,26 +69,25 @@ margin_bottom = 65.0
 custom_fonts/font = ExtResource( 3 )
 text = "Continue"
 
-[node name="NewGameLabel" type="Label" parent="MenuContainer/OptionLogoSplit/OptionTitleSplit/OptionsContainer"]
+[node name="NewGameButton" type="Button" parent="MenuContainer/OptionLogoSplit/OptionTitleSplit/OptionsContainer"]
 margin_top = 85.0
 margin_right = 854.0
-margin_bottom = 150.0
-size_flags_vertical = 1
+margin_bottom = 156.0
 custom_fonts/font = ExtResource( 3 )
 text = "New Game"
 
 [node name="OptionsLabel" type="Label" parent="MenuContainer/OptionLogoSplit/OptionTitleSplit/OptionsContainer"]
-margin_top = 170.0
+margin_top = 176.0
 margin_right = 854.0
-margin_bottom = 235.0
+margin_bottom = 241.0
 size_flags_vertical = 1
 custom_fonts/font = ExtResource( 3 )
 text = "Options"
 
 [node name="Label" type="Label" parent="MenuContainer/OptionLogoSplit/OptionTitleSplit/OptionsContainer"]
-margin_top = 255.0
+margin_top = 261.0
 margin_right = 854.0
-margin_bottom = 320.0
+margin_bottom = 326.0
 custom_fonts/font = ExtResource( 3 )
 text = "Credits"
 
@@ -150,3 +149,4 @@ stretch_mode = 5
 __meta__ = {
 "_edit_use_anchors_": false
 }
+[connection signal="pressed" from="MenuContainer/OptionLogoSplit/OptionTitleSplit/OptionsContainer/NewGameButton" to="." method="_on_NewGameButton_pressed"]

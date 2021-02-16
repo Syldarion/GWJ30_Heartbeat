@@ -1,3 +1,4 @@
+class_name Cockpit
 extends Node
 
 export(NodePath) var heartbeat_sensor_node_path
@@ -20,6 +21,8 @@ onready var heading_label = get_node(heading_label_path) as Label
 onready var location_label = get_node(location_label_path) as Label
 onready var weapon_status = get_node(weapon_status_path) as WeaponStatus
 onready var comms_panel = get_node(comms_panel_path) as CommsPanel
+
+var mech_controls_locked = false
 
 var level_position = Vector2(0.0, 0.0)
 var rotation = 0.0
@@ -57,14 +60,15 @@ func _ready():
 func _process(delta):
 	last_step_impulse += delta
 	
-	if Input.is_action_pressed("turn_left"):
-		rotate_mech(-1, delta)
-	elif Input.is_action_pressed("turn_right"):
-		rotate_mech(1, delta)
-	elif Input.is_action_pressed("move_forward"):
-		move_forward(delta)
-	elif Input.is_action_pressed("move_backward"):
-		move_backward(delta)
+	if not mech_controls_locked:
+		if Input.is_action_pressed("turn_left"):
+			rotate_mech(-1, delta)
+		elif Input.is_action_pressed("turn_right"):
+			rotate_mech(1, delta)
+		elif Input.is_action_pressed("move_forward"):
+			move_forward(delta)
+		elif Input.is_action_pressed("move_backward"):
+			move_backward(delta)
 	
 	for target in active_targets:
 		var target_pos_transformed = convert_world_to_local(active_targets[target].target_location)
@@ -84,15 +88,16 @@ func _process(delta):
 	weapon_status.update_status(loader_retracted, shell_empty, ammo_loaded)
 
 func _input(event):
-	if event.is_action_pressed("toggle_loader"):
-		toggle_loader()
-	elif event.is_action_pressed("load_shell"):
-		if event.shift:
-			unload_shell()
-		else:
-			load_shell()
-	elif event.is_action_pressed("fire_shell"):
-		fire_shell()
+	if not mech_controls_locked:
+		if event.is_action_pressed("toggle_loader"):
+			toggle_loader()
+		elif event.is_action_pressed("load_shell"):
+			if event.shift:
+				unload_shell()
+			else:
+				load_shell()
+		elif event.is_action_pressed("fire_shell"):
+			fire_shell()
 
 func load_shell():
 	if ammo_loaded:
@@ -200,3 +205,6 @@ func get_closest_target_in_view():
 			closest_distance = polar.x
 	
 	return closest_target
+
+func set_mech_lock(lock_state):
+	mech_controls_locked = lock_state

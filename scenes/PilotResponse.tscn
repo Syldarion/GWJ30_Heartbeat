@@ -19,12 +19,12 @@ name_label_path = NodePath("VBoxContainer/Name")
 message_label_path = NodePath("VBoxContainer/Label")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
-margin_left = 476.0
 margin_right = 742.0
-margin_bottom = 51.0
+margin_bottom = 323.0
+size_flags_horizontal = 3
 
 [node name="Name" type="Label" parent="VBoxContainer"]
-margin_right = 266.0
+margin_right = 742.0
 margin_bottom = 16.0
 custom_fonts/font = ExtResource( 4 )
 text = "Pilot"
@@ -32,19 +32,21 @@ align = 2
 
 [node name="Label" type="Label" parent="VBoxContainer"]
 margin_top = 20.0
-margin_right = 266.0
+margin_right = 742.0
 margin_bottom = 51.0
+size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 3 )
 text = "This is a response."
 align = 2
+autowrap = true
 
 [node name="VSeparator" type="VSeparator" parent="."]
 margin_left = 746.0
 margin_right = 750.0
-margin_bottom = 51.0
+margin_bottom = 323.0
 
 [node name="TextureRect" type="TextureRect" parent="."]
 margin_left = 754.0
 margin_right = 786.0
-margin_bottom = 51.0
+margin_bottom = 323.0
 texture = ExtResource( 1 )

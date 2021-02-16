@@ -1,5 +1,7 @@
 extends Node
 
+signal scene_loaded
+
 var loader
 var wait_frames
 var time_max = 100
@@ -61,3 +63,4 @@ func update_progress():
 func set_new_scene(scene_resource):
 	current_scene = scene_resource.instance()
 	get_node("/root").add_child(current_scene)
+	emit_signal("scene_loaded")

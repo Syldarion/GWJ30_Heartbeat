@@ -14,10 +14,7 @@
 [ext_resource path="res://scripts/comms_panel.gd" type="Script" id=12]
 [ext_resource path="res://scenes/PilotResponse.tscn" type="PackedScene" id=13]
 [ext_resource path="res://scenes/CommsMessage.tscn" type="PackedScene" id=14]
-
-[sub_resource type="NoiseTexture" id=1]
-width = 800
-height = 400
+[ext_resource path="res://scenes/ReponseButton.tscn" type="PackedScene" id=15]
 
 [node name="CockpitRoot" type="Node2D"]
 script = ExtResource( 4 )
@@ -141,32 +138,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CommsPanel" type="Sprite" parent="."]
+[node name="CommsPanel" type="Node2D" parent="."]
 position = Vector2( -0.594601, -271.352 )
-texture = SubResource( 1 )
-region_rect = Rect2( 0, 0, 1000, 1000 )
 script = ExtResource( 12 )
 comms_message_scene = ExtResource( 14 )
 pilot_response_scene = ExtResource( 13 )
+response_scene = ExtResource( 15 )
 comms_parent_path = NodePath("PanelContainer/VSplitContainer/ScrollContainer/VBoxContainer")
 comms_scroll_box_path = NodePath("PanelContainer/VSplitContainer/ScrollContainer")
-
-[node name="CommsText" type="Label" parent="CommsPanel"]
-visible = false
-margin_left = -398.0
-margin_top = -198.0
-margin_right = 397.0
-margin_bottom = 197.0
-custom_fonts/font = ExtResource( 6 )
-custom_colors/font_color = Color( 0, 1, 0, 1 )
-text = "This is a test line
-Test line two"
-align = 2
-valign = 2
-autowrap = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
+response_parent_path = NodePath("PanelContainer/VSplitContainer/HBoxContainer")
+time_between_messages = 1.0
 
 [node name="PanelContainer" type="PanelContainer" parent="CommsPanel"]
 margin_left = -400.0
@@ -198,10 +179,12 @@ size_flags_vertical = 3
 alignment = 2
 
 [node name="CommsMessage" parent="CommsPanel/PanelContainer/VSplitContainer/ScrollContainer/VBoxContainer" instance=ExtResource( 14 )]
+visible = false
 margin_top = 228.0
 margin_bottom = 279.0
 
 [node name="PilotResponse" parent="CommsPanel/PanelContainer/VSplitContainer/ScrollContainer/VBoxContainer" instance=ExtResource( 13 )]
+visible = false
 margin_top = 283.0
 margin_bottom = 334.0
 
@@ -218,16 +201,7 @@ rect_min_size = Vector2( 0, 40 )
 custom_constants/separation = 12
 alignment = 2
 
-[node name="Button" type="Button" parent="CommsPanel/PanelContainer/VSplitContainer/HBoxContainer"]
-margin_left = 680.0
-margin_right = 734.0
-margin_bottom = 40.0
-custom_fonts/font = ExtResource( 6 )
-text = "Yes"
-
-[node name="Button2" type="Button" parent="CommsPanel/PanelContainer/VSplitContainer/HBoxContainer"]
-margin_left = 746.0
+[node name="ReponseButton" parent="CommsPanel/PanelContainer/VSplitContainer/HBoxContainer" instance=ExtResource( 15 )]
+visible = false
+margin_left = 732.0
 margin_right = 786.0
-margin_bottom = 40.0
-custom_fonts/font = ExtResource( 6 )
-text = "No"

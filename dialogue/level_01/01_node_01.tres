@@ -1,0 +1,22 @@
+[gd_resource type="Resource" load_steps=7 format=2]
+
+[ext_resource path="res://scripts/dialogue_node.gd" type="Script" id=1]
+[ext_resource path="res://scripts/dialogue_link.gd" type="Script" id=2]
+[ext_resource path="res://dialogue/level_01/01_node_02.tres" type="Resource" id=3]
+[ext_resource path="res://dialogue/level_01/01_node_03.tres" type="Resource" id=4]
+
+[sub_resource type="Resource" id=1]
+script = ExtResource( 2 )
+link_text = "Yes"
+next_node = ExtResource( 3 )
+
+[sub_resource type="Resource" id=2]
+script = ExtResource( 2 )
+link_text = "No"
+next_node = ExtResource( 4 )
+
+[resource]
+script = ExtResource( 1 )
+speaker = "Mech"
+lines = [ "Can you see this?", "Just say yes or no." ]
+links = [ SubResource( 1 ), SubResource( 2 ) ]

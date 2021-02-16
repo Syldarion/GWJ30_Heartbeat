@@ -10,6 +10,11 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Node",
+"class": "Cockpit",
+"language": "GDScript",
+"path": "res://scripts/cockpit.gd"
+}, {
+"base": "Node",
 "class": "CommsMessage",
 "language": "GDScript",
 "path": "res://scripts/comms_message.gd"
@@ -18,6 +23,26 @@ _global_script_classes=[ {
 "class": "CommsPanel",
 "language": "GDScript",
 "path": "res://scripts/comms_panel.gd"
+}, {
+"base": "Resource",
+"class": "DialogueLine",
+"language": "GDScript",
+"path": "res://scripts/dialogue_line.gd"
+}, {
+"base": "Resource",
+"class": "DialogueLink",
+"language": "GDScript",
+"path": "res://scripts/dialogue_link.gd"
+}, {
+"base": "Resource",
+"class": "DialogueNode",
+"language": "GDScript",
+"path": "res://scripts/dialogue_node.gd"
+}, {
+"base": "Resource",
+"class": "DialogueTree",
+"language": "GDScript",
+"path": "res://scripts/dialogue_tree.gd"
 }, {
 "base": "Node",
 "class": "HeartSensor",
@@ -29,10 +54,35 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://scripts/impulse_camera.gd"
 }, {
+"base": "LevelScript",
+"class": "Level01",
+"language": "GDScript",
+"path": "res://scripts/levels/level_01.gd"
+}, {
+"base": "Reference",
+"class": "LevelData",
+"language": "GDScript",
+"path": "res://scripts/level_data.gd"
+}, {
+"base": "Reference",
+"class": "LevelScript",
+"language": "GDScript",
+"path": "res://scripts/level_script.gd"
+}, {
+"base": "Button",
+"class": "ResponseButton",
+"language": "GDScript",
+"path": "res://scripts/response_button.gd"
+}, {
 "base": "Object",
 "class": "SensorTarget",
 "language": "GDScript",
 "path": "res://scripts/sensor_target.gd"
+}, {
+"base": "LevelScript",
+"class": "TrainingLevel",
+"language": "GDScript",
+"path": "res://scripts/levels/training_level.gd"
 }, {
 "base": "Node",
 "class": "WeaponStatus",
@@ -40,18 +90,28 @@ _global_script_classes=[ {
 "path": "res://scripts/weapon_status.gd"
 } ]
 _global_script_class_icons={
+"Cockpit": "",
 "CommsMessage": "",
 "CommsPanel": "",
+"DialogueLine": "",
+"DialogueLink": "",
+"DialogueNode": "",
+"DialogueTree": "",
 "HeartSensor": "",
 "ImpulseCamera": "",
+"Level01": "",
+"LevelData": "",
+"LevelScript": "",
+"ResponseButton": "",
 "SensorTarget": "",
+"TrainingLevel": "",
 "WeaponStatus": ""
 }
 
 [application]
 
 config/name="GWJ_30"
-run/main_scene="res://scenes/GameRoot.tscn"
+run/main_scene="res://scenes/MainMenu.tscn"
 config/icon="res://icon.png"
 
 [autoload]
@@ -59,6 +119,7 @@ config/icon="res://icon.png"
 SceneLoader="*res://scripts/scene_loader.gd"
 PlayerVariables="*res://scripts/player_variables.gd"
 InputManager="*res://scripts/input_manager.gd"
+GameManager="*res://scripts/game_manager.gd"
 
 [display]
 

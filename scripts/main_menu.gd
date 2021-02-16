@@ -18,3 +18,7 @@ func _ready():
 		continue_button_theme.set_color("font_color", "Label", Color(1.0, 1.0, 1.0, 1.0))
 	
 	continue_node.theme = continue_button_theme
+
+
+func _on_NewGameButton_pressed():
+	GameManager.load_level("res://scripts/levels/level_01.gd")
