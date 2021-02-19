@@ -1,43 +1,59 @@
 class_name Level01
 extends LevelScript
 
+signal all_targets_killed
+
+var level_targets
+var pre_level_dialogue
+var post_level_dialogue
+
 var waiting
 var corrupt_line_ref
 
 func _init():
 	level_name = "level_01"
+	
+	level_targets = build_target_list()
+	pre_level_dialogue = build_pre_level_dialogue()
+	post_level_dialogue = build_post_level_dialogue()
+	
+func build_target_list():
+	var targets = [
+		SensorTarget.new("Solomon Lloyd", Vector2(15, 10)),
+		SensorTarget.new("Margerie Lloyd", Vector2(15.5, 10.1)),
+		SensorTarget.new("Peter Hayes", Vector2(-5.5, -3))
+	]
+	
+	return targets
 
 func build_pre_level_dialogue():
 	var tree = DialogueTree.new()
 	
 	var node_1 = DialogueNode.new()
-	var node_1_line_1 = DialogueLine.new("Mech", "Hello pilot! I've suspended my systems to run diagnostics.")
-	node_1_line_1.connect("line_sent", self, "_on_node_1_line_1_sent")
-	node_1_line_1.has_exec = true
+	var node_1_line_1 = DialogueLine.new(NM_MECH, "Hello pilot! I've suspended my systems to run diagnostics.", 1.0)
+	node_1_line_1.on_sent(self, "_on_node_1_line_1_sent")
 	node_1.add_built_line(node_1_line_1)
 	
-	node_1.add_line("Mech", "Please stand by.")
-	node_1.add_line("Mech", "Checking leg hydraulics...")
-	node_1.add_line("Mech", "Check.")
-	node_1.add_line("Mech", "Checking shell loader...")
-	node_1.add_line("Mech", "Check.")
+	node_1.add_line(NM_MECH, "Please stand by.", 0.5)
+	node_1.add_line(NM_MECH, "Checking leg hydraulics...", 0.5)
+	node_1.add_line(NM_MECH, "Check.", 2.0)
+	node_1.add_line(NM_MECH, "Checking shell loader...", 0.5)
+	node_1.add_line(NM_MECH, "Check.", 2.0)
 	
-	var node_1_comm_check_line = DialogueLine.new("Mech", "Checking communications network...")
-	node_1_comm_check_line.connect("line_sent", self, "_on_node_1_comm_check_line_sent")
-	node_1_comm_check_line.has_exec = true
+	var node_1_comm_check_line = DialogueLine.new(NM_MECH, "Checking communications network...", 0.5)
+	node_1_comm_check_line.on_sent(self, "_on_node_1_comm_check_line_sent")
 	node_1.add_built_line(node_1_comm_check_line)
 	
 	var node_2 = DialogueNode.new()
-	node_2.add_line("Mech", "Check.")
-	node_2.add_line("Mech", "System diagnostics complete.")
+	node_2.add_line(NM_MECH, "Check.", 2.0)
+	node_2.add_line(NM_MECH, "System diagnostics complete.", 0.5)
 	
-	var node_2_unlock_line = DialogueLine.new("Mech", "Returning control to you, pilot.")
-	node_2_unlock_line.connect("line_sent", self, "_on_node_2_unlock_line_sent")
-	node_2_unlock_line.has_exec = true
+	var node_2_unlock_line = DialogueLine.new(NM_MECH, "Returning control to you, pilot.", 1.0)
+	node_2_unlock_line.on_sent(self, "_on_node_2_unlock_line_sent")
 	node_2.add_built_line(node_2_unlock_line)
 	
 	var node_1_2_link = DialogueLink.new("What?", node_2)
-	node_1_2_link.connect("link_selected", self, "_on_node_1_2_link_selected")
+	node_1_2_link.on_selected(self, "_on_node_1_2_link_selected")
 	
 	node_1.add_built_link(node_1_2_link)
 	
@@ -47,55 +63,57 @@ func build_pre_level_dialogue():
 	return tree
 
 func build_post_level_dialogue():
-	pass
+	var tree = DialogueTree.new()
+	
+	var node_1 = DialogueNode.new()
+	node_1.add_line(NM_MECH, "All targets eliminated. Well done pilot!", 0.5)
+	node_1.add_line(NM_MECH, "Please return to the extraction point.", 0.5)
+	
+	tree.nodes = [node_1]
+	tree.active_node = node_1
+	
+	return tree
 
 func run_level_script():
 	yield(run_dialogue(pre_level_dialogue), "completed")
 	
-func run_dialogue(dialogue: DialogueTree):
-	while dialogue.active_node:
-		dialogue.active_node = yield(run_node(dialogue.active_node), "completed")
-	print("DIALOGUE COMPLETE")
-
-func stop_waiting():
-	waiting = false
-
-func run_node(dialogue_node: DialogueNode) -> DialogueNode:
-	print("RUN NODE")
-	for line in dialogue_node.lines:
-		yield(run_line(line), "completed")
-	print("LINES DONE")
-	if not dialogue_node.links:
-		return null
-	for link in dialogue_node.links:
-		var button = comms_ref.add_response(link.link_text)
-		button.connect("selected", link, "_on_Response_Button_selected")
-		link.connect("link_selected", dialogue_node, "complete_node", [link])
-	return yield(dialogue_node, "node_completed")
-
-func run_line(dialogue_line: DialogueLine):
-	print("RUN LINE")
-	yield(manager_ref.get_tree().create_timer(2.0), "timeout")
-	var item_ref = comms_ref.print_message(dialogue_line.speaker, dialogue_line.line)
-	dialogue_line.send_line(item_ref)
-	if dialogue_line.has_exec:
-		while not dialogue_line.completed:
-			yield(manager_ref.get_tree().create_timer(0.1), "timeout")
+	for target in level_targets:
+		target.connect("killed", self, "_on_target_killed")
+		cockpit_ref.register_target(target)
+	
+	yield(self, "all_targets_killed")
+	
+	yield(run_dialogue(post_level_dialogue), "completed")
+	
+func check_targets_killed():
+	for target in level_targets:
+		if not target.is_dead:
+			return false
+	return true
 
 func _on_node_1_line_1_sent(line_ref, line_item_ref):
-	cockpit_ref.set_mech_lock(true)
+	cockpit_ref.set_mech_lock(true, true)
 	line_ref.complete_line()
 
 func _on_node_1_comm_check_line_sent(line_ref, line_item_ref):
 	corrupt_line_ref = line_item_ref
 	yield(manager_ref.get_tree().create_timer(1.0), "timeout")
+	yield(glitch_message(line_item_ref, 0.25), "completed")
 	corrupt_line_ref.set_message_data("???", "DO NOT TRUST THEM.")
+	yield(unglitch_message(line_item_ref, 0.25), "completed")
 	line_ref.complete_line()
 
 func _on_node_2_unlock_line_sent(line_ref, line_item_ref):
-	cockpit_ref.set_mech_lock(false)
+	cockpit_ref.set_mech_lock(false, false)
 	line_ref.complete_line()
 
 func _on_node_1_2_link_selected():
 	yield(manager_ref.get_tree().create_timer(1.0), "timeout")
-	corrupt_line_ref.set_message_data("Mech", "Checking communications network...")
+	yield(glitch_message(corrupt_line_ref, 0.25), "completed")
+	corrupt_line_ref.set_message_data(NM_MECH, "Checking communications network...")
+	yield(unglitch_message(corrupt_line_ref, 0.25), "completed")
+
+func _on_target_killed(target_ref):
+	var all_killed = check_targets_killed()
+	if all_killed:
+		emit_signal("all_targets_killed")

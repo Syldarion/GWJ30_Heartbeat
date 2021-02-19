@@ -13,8 +13,8 @@ func _init():
 func add_built_line(line: DialogueLine):
 	lines.append(line)
 
-func add_line(speaker: String, line: String):
-	var new_line = DialogueLine.new(speaker, line)
+func add_line(speaker: String, line: String, wait: float):
+	var new_line = DialogueLine.new(speaker, line, wait)
 	lines.append(new_line)
 	return new_line
 

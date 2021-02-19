@@ -21,4 +21,5 @@ func _ready():
 
 
 func _on_NewGameButton_pressed():
-	GameManager.load_level("res://scripts/levels/level_01.gd")
+	GameManager.load_level("res://scripts/levels/training_level.gd")
+	# GameManager.load_level("res://scripts/levels/level_01.gd")

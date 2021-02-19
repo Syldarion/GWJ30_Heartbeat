@@ -27,8 +27,8 @@ func update_target(target: SensorTarget, position):
 	var half_w = scanner_pixel_width / 2
 	
 	# 32 is the size of the target dot, oh noooo, magic number
-	var outside_y = converted.y > -32 or converted.y < (-scanner_pixel_height + 32)
-	var outside_x = converted.x > (half_w - 32) or converted.x < (-half_w + 32)
+	var outside_y = converted.y > -16 or converted.y < (-scanner_pixel_height + 16)
+	var outside_x = converted.x > (half_w - 16) or converted.x < (-half_w + 16)
 	
 	if outside_y or outside_x:
 		target_dots[target.target_name].hide()

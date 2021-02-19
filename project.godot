@@ -44,6 +44,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://scripts/dialogue_tree.gd"
 }, {
+"base": "Control",
+"class": "GlitchEffect",
+"language": "GDScript",
+"path": "res://scripts/glitch_effect.gd"
+}, {
 "base": "Node",
 "class": "HeartSensor",
 "language": "GDScript",
@@ -97,6 +102,7 @@ _global_script_class_icons={
 "DialogueLink": "",
 "DialogueNode": "",
 "DialogueTree": "",
+"GlitchEffect": "",
 "HeartSensor": "",
 "ImpulseCamera": "",
 "Level01": "",

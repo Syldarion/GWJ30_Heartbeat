@@ -1,0 +1,21 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=2]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+render_mode unshaded;
+
+uniform vec2 scr_tex_size;
+uniform float size_x;
+uniform float size_y;
+
+void fragment() {
+	vec2 uv = SCREEN_UV;
+	uv -= mod(uv, vec2(size_x, size_y) / scr_tex_size);
+	COLOR.rgb = textureLod(SCREEN_TEXTURE, uv, 0.0).rgb;
+}"
+
+[resource]
+shader = SubResource( 1 )
+shader_param/scr_tex_size = Vector2( 1920, 1080 )
+shader_param/size_x = 1.0
+shader_param/size_y = 1.0

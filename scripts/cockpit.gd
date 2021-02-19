@@ -1,12 +1,19 @@
 class_name Cockpit
 extends Node
 
+signal shell_fired
+signal loader_extended
+signal loader_retracted
+signal shell_loaded
+signal shell_ejected
+
 export(NodePath) var heartbeat_sensor_node_path
 export(NodePath) var camera_node_path
 export(NodePath) var heading_label_path
 export(NodePath) var location_label_path
 export(NodePath) var weapon_status_path
 export(NodePath) var comms_panel_path
+export(NodePath) var glitch_cover_path
 
 export var forward_speed = 1.0
 export var backward_speed = 1.0
@@ -21,8 +28,10 @@ onready var heading_label = get_node(heading_label_path) as Label
 onready var location_label = get_node(location_label_path) as Label
 onready var weapon_status = get_node(weapon_status_path) as WeaponStatus
 onready var comms_panel = get_node(comms_panel_path) as CommsPanel
+onready var glitch_cover = get_node(glitch_cover_path) as GlitchEffect
 
 var mech_controls_locked = false
+var mech_weapons_locked = false
 
 var level_position = Vector2(0.0, 0.0)
 var rotation = 0.0
@@ -42,20 +51,7 @@ var active_targets = {}
 var locked_target: SensorTarget
 
 func _ready():
-	var rng = RandomNumberGenerator.new()
-	rng.randomize()
-	
-	for i in range(5):
-		var new_target = SensorTarget.new()
-		new_target.target_name = "target_%d" % i
-		var rand_dist = rng.randf_range(1.0, sensor_distance - 1.0)
-		var rand_ang = deg2rad(rng.randf() * 360.0)
-		
-		new_target.target_location = polar2cartesian(rand_dist, rand_ang)
-		active_targets[new_target.target_name] = new_target
-	
-	for target in active_targets:
-		heartbeat_sensor.add_target(active_targets[target])
+	pass
 
 func _process(delta):
 	last_step_impulse += delta
@@ -88,7 +84,7 @@ func _process(delta):
 	weapon_status.update_status(loader_retracted, shell_empty, ammo_loaded)
 
 func _input(event):
-	if not mech_controls_locked:
+	if not mech_weapons_locked:
 		if event.is_action_pressed("toggle_loader"):
 			toggle_loader()
 		elif event.is_action_pressed("load_shell"):
@@ -99,62 +95,78 @@ func _input(event):
 		elif event.is_action_pressed("fire_shell"):
 			fire_shell()
 
+func register_target(target: SensorTarget):
+	active_targets[target.target_name] = target
+	heartbeat_sensor.add_target(target)
+	# right now, this signal is useless compared to just calling it down there
+	target.connect("killed", self, "kill_target")
+
+func kill_target(target: SensorTarget):
+	heartbeat_sensor.remove_target(target)
+	active_targets.erase(target.target_name)
+
 func load_shell():
 	if ammo_loaded:
-		comms_panel.add_line("The Mech", "Cannot load: Ammo already loaded")
+		comms_panel.print_message("Mech", "Cannot load: Ammo already loaded")
 		return
 	
 	if !loader_retracted:
-		comms_panel.add_line("The Mech", "Cannot load: Loader is extended")
+		comms_panel.print_message("Mech", "Cannot load: Loader is extended")
 		return
 		
-	comms_panel.add_line("The Mech", "Loading shell...")
 	ammo_loaded = true
 	shell_empty = false
 	
+	emit_signal("shell_loaded")
+	
 func unload_shell():
 	if !ammo_loaded:
-		comms_panel.add_line("The Mech", "Cannot unload: No ammo is loaded")
+		comms_panel.print_message("Mech", "Cannot unload: No ammo is loaded")
 		return
 	
 	if !loader_retracted:
-		comms_panel.add_line("The Mech", "Cannot unload: Loader is extended")
+		comms_panel.print_message("Mech", "Cannot unload: Loader is extended")
 		return
 	
-	comms_panel.add_line("The Mech", "Unloading shell...")
 	ammo_loaded = false
 	shell_empty = true
 	
+	emit_signal("shell_ejected")
+	
 func fire_shell():
 	if !ammo_loaded:
-		comms_panel.add_line("The Mech", "Cannot fire: No ammo is loaded")
+		comms_panel.print_message("Mech", "Cannot fire: No ammo is loaded")
 		return
 	
 	if shell_empty:
-		comms_panel.add_line("The Mech", "Cannot fire: Shell is empty")
+		comms_panel.print_message("Mech", "Cannot fire: Shell is empty")
 		return
 	
 	if loader_retracted:
-		comms_panel.add_line("The Mech", "Cannot fire: Loader is retracted")
+		comms_panel.print_message("Mech", "Cannot fire: Loader is retracted")
 		return
 	
-	comms_panel.add_line("The Mech", "Firing...")
 	shell_empty = true
+	emit_signal("shell_fired")
 	
 	var closest_target = get_closest_target_in_view()
 	if closest_target == null:
 		return
 	
-	heartbeat_sensor.remove_target(closest_target)
-	active_targets.erase(closest_target.target_name)
+	closest_target.kill()
 
 func toggle_loader():
 	if loader_retracted:
-		comms_panel.add_line("The Mech", "Extending loader...")
+		comms_panel.print_message("Mech", "Extending loader...")
 	else:
-		comms_panel.add_line("The Mech", "Retracting loader...")
+		comms_panel.print_message("Mech", "Retracting loader...")
 	
 	loader_retracted = !loader_retracted
+	
+	if loader_retracted:
+		emit_signal("loader_retracted")
+	else:
+		emit_signal("loader_extended")
 
 func rotate_mech(direction, delta):
 	if last_step_impulse > seconds_between_step_impulse:
@@ -206,5 +218,6 @@ func get_closest_target_in_view():
 	
 	return closest_target
 
-func set_mech_lock(lock_state):
-	mech_controls_locked = lock_state
+func set_mech_lock(controls_locked, weapons_locked):
+	mech_controls_locked = controls_locked
+	mech_weapons_locked = weapons_locked

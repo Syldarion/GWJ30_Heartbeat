@@ -4,6 +4,8 @@ class_name ResponseButton
 
 signal selected(button)
 
+var link_ref
+
 func _ready():
 	connect("pressed", self, "_on_Button_pressed")
 
