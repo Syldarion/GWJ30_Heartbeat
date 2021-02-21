@@ -14,6 +14,7 @@ export(NodePath) var location_label_path
 export(NodePath) var weapon_status_path
 export(NodePath) var comms_panel_path
 export(NodePath) var glitch_cover_path
+export(NodePath) var kill_satisfaction_path
 
 export var forward_speed = 1.0
 export var backward_speed = 1.0
@@ -29,6 +30,7 @@ onready var location_label = get_node(location_label_path) as Label
 onready var weapon_status = get_node(weapon_status_path) as WeaponStatus
 onready var comms_panel = get_node(comms_panel_path) as CommsPanel
 onready var glitch_cover = get_node(glitch_cover_path) as GlitchEffect
+onready var kill_satisfaction = get_node(kill_satisfaction_path) as KillSatisfactionDisplay
 
 var mech_controls_locked = false
 var mech_weapons_locked = false
@@ -94,6 +96,8 @@ func _input(event):
 				load_shell()
 		elif event.is_action_pressed("fire_shell"):
 			fire_shell()
+	if event.is_action_pressed("ping"):
+		ping_targets()
 
 func register_target(target: SensorTarget):
 	active_targets[target.target_name] = target
@@ -152,15 +156,14 @@ func fire_shell():
 	var closest_target = get_closest_target_in_view()
 	if closest_target == null:
 		return
+		
+	var near_targets = get_near_targets(closest_target, 1.0)
 	
 	closest_target.kill()
+	for target in near_targets:
+		target.kill()
 
 func toggle_loader():
-	if loader_retracted:
-		comms_panel.print_message("Mech", "Extending loader...")
-	else:
-		comms_panel.print_message("Mech", "Retracting loader...")
-	
 	loader_retracted = !loader_retracted
 	
 	if loader_retracted:
@@ -185,6 +188,22 @@ func move_backward(delta):
 		impulse_camera.add_impulse(rand_range(0.3, 0.5))
 		last_step_impulse = 0.0
 	level_position -= polar2cartesian(backward_speed * delta, rotation)
+
+func ping_targets():
+	var positions = []
+	for target_name in active_targets:
+		var target = active_targets[target_name]
+		if target.is_dead:
+			continue
+		positions.append(target.target_location)
+	if not positions:
+		comms_panel.print_message("Mech", "No targets detected")
+		return
+	
+	var pos_string = "Targets: "
+	for position in positions:
+		pos_string += "[%5.1f, %5.1f] " % [position.x, position.y]
+	comms_panel.print_message("Mech", pos_string)
 
 func convert_world_to_local(point: Vector2) -> Vector2:
 	var local_x = (point.x - level_position.x) * cos(rotation) + (point.y - level_position.y) * sin(rotation)
@@ -217,6 +236,17 @@ func get_closest_target_in_view():
 			closest_distance = polar.x
 	
 	return closest_target
+
+func get_near_targets(target, distance):
+	var targets = []
+	for target_name in active_targets:
+		var cur_target = active_targets[target_name]
+		if cur_target == target:
+			continue
+		var target_distance = target.target_location.distance_to(cur_target.target_location)
+		if target_distance <= distance:
+			targets.append(cur_target)
+	return targets
 
 func set_mech_lock(controls_locked, weapons_locked):
 	mech_controls_locked = controls_locked

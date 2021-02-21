@@ -1,22 +1,51 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=29 format=2]
 
 [ext_resource path="res://scenes/TargetDot.tscn" type="PackedScene" id=1]
-[ext_resource path="res://sprites/Cockpit_Mockup.png" type="Texture" id=2]
+[ext_resource path="res://sprites/Cockpit_Final.png" type="Texture" id=2]
 [ext_resource path="res://scripts/heart_sensor.gd" type="Script" id=3]
 [ext_resource path="res://scripts/cockpit.gd" type="Script" id=4]
 [ext_resource path="res://scripts/impulse_camera.gd" type="Script" id=5]
 [ext_resource path="res://fonts/officecodepro_regular_panel.tres" type="DynamicFont" id=6]
 [ext_resource path="res://sprites/Cockpit_Radar_Overlay.png" type="Texture" id=7]
-[ext_resource path="res://sprites/SensorDot.png" type="Texture" id=8]
-[ext_resource path="res://materials/sensor_dot_inactive_mat.tres" type="Material" id=9]
-[ext_resource path="res://materials/sensor_dot_material.tres" type="Material" id=10]
+[ext_resource path="res://sprites/Cockpit_Weapon_Loader.png" type="Texture" id=8]
+[ext_resource path="res://themes/mech_theme.tres" type="Theme" id=9]
+[ext_resource path="res://scripts/kill_satisfaction_display.gd" type="Script" id=10]
 [ext_resource path="res://scripts/weapon_status.gd" type="Script" id=11]
 [ext_resource path="res://scripts/comms_panel.gd" type="Script" id=12]
 [ext_resource path="res://scenes/PilotResponse.tscn" type="PackedScene" id=13]
 [ext_resource path="res://scenes/CommsMessage.tscn" type="PackedScene" id=14]
 [ext_resource path="res://scenes/ReponseButton.tscn" type="PackedScene" id=15]
-[ext_resource path="res://materials/glitch_material.tres" type="Material" id=16]
 [ext_resource path="res://scripts/glitch_effect.gd" type="Script" id=17]
+[ext_resource path="res://materials/shear_material.tres" type="Material" id=18]
+[ext_resource path="res://sprites/Cockpit_Satisfaction_Sad.png" type="Texture" id=19]
+[ext_resource path="res://sprites/Cockpit_Satisfaction_Happy.png" type="Texture" id=20]
+[ext_resource path="res://sprites/Cockpit_Weapon_Shell.png" type="Texture" id=21]
+[ext_resource path="res://sprites/Cockpit_Weapon_Extended.png" type="Texture" id=22]
+[ext_resource path="res://sprites/Cockpit_Weapon_Retracted.png" type="Texture" id=23]
+[ext_resource path="res://sprites/Cockpit_Satisfaction_Border.png" type="Texture" id=24]
+[ext_resource path="res://sprites/Cockpit_Satisfaction_Neutral.png" type="Texture" id=25]
+[ext_resource path="res://sprites/Cockpit_Weapon_Empty.png" type="Texture" id=26]
+[ext_resource path="res://fonts/officecodepro_regular_half.tres" type="DynamicFont" id=27]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+render_mode unshaded;
+
+uniform vec2 scr_tex_size;
+uniform float size_x;
+uniform float size_y;
+
+void fragment() {
+	vec2 uv = SCREEN_UV;
+	uv -= mod(uv, vec2(size_x, size_y) / scr_tex_size);
+	COLOR.rgb = textureLod(SCREEN_TEXTURE, uv, 0.0).rgb;
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+shader_param/scr_tex_size = Vector2( 1920, 1080 )
+shader_param/size_x = 1.0
+shader_param/size_y = 1.0
 
 [node name="CockpitRoot" type="Node2D"]
 script = ExtResource( 4 )
@@ -26,16 +55,14 @@ heading_label_path = NodePath("HeartSensor/SensorHeadingLabel")
 location_label_path = NodePath("HeartSensor/SensorLocationLabel")
 weapon_status_path = NodePath("WeaponStatusGroup")
 comms_panel_path = NodePath("CommsPanel")
+glitch_cover_path = NodePath("BackBufferCopy/GlitchCover")
+kill_satisfaction_path = NodePath("KillSatisfactionGroup")
 backward_speed = 0.5
 turn_speed = 45.0
 viewing_angle = 35.0
 
-[node name="Sprite" type="Sprite" parent="."]
-position = Vector2( 0.707031, 0 )
+[node name="CockpitBackground" type="Sprite" parent="."]
 texture = ExtResource( 2 )
-
-[node name="Sprite" type="Sprite" parent="Sprite"]
-texture = ExtResource( 7 )
 
 [node name="HeartSensor" type="Node2D" parent="."]
 position = Vector2( 0, 440 )
@@ -74,6 +101,10 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Sprite" type="Sprite" parent="HeartSensor"]
+position = Vector2( 0, -440 )
+texture = ExtResource( 7 )
+
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true
 script = ExtResource( 5 )
@@ -82,144 +113,138 @@ max_offset = Vector2( 0, 90 )
 max_impulse = 0.8
 
 [node name="WeaponStatusGroup" type="Node2D" parent="."]
+position = Vector2( 600, -380 )
 script = ExtResource( 11 )
-loader_status_path = NodePath("LoaderStatusSprite")
-empty_shell_path = NodePath("EmptyShellSprite")
-ammo_loaded_path = NodePath("AmmoLoadedSprite")
-active_mat = ExtResource( 10 )
-inactive_mat = ExtResource( 9 )
+shell_sprite_path = NodePath("ShellSprite")
+loader_sprite_path = NodePath("LoaderSprite")
+empty_sprite_path = NodePath("EmptySprite")
+extended_sprite_path = NodePath("ExtendedSprite")
+retracted_sprite_path = NodePath("RetractedSprite")
+status_label_path = NodePath("StatusLabelParent/StatusLabel")
 
-[node name="LoaderStatusSprite" type="Sprite" parent="WeaponStatusGroup"]
-material = ExtResource( 9 )
-position = Vector2( 340, 150 )
-rotation = 0.174533
-scale = Vector2( 1.15, 1 )
+[node name="ShellSprite" type="Sprite" parent="WeaponStatusGroup"]
+texture = ExtResource( 21 )
+
+[node name="LoaderSprite" type="Sprite" parent="WeaponStatusGroup"]
 texture = ExtResource( 8 )
 
-[node name="Label" type="Label" parent="WeaponStatusGroup/LoaderStatusSprite"]
-margin_left = 20.9337
-margin_top = -7.2153
-margin_right = 105.934
-margin_bottom = 6.7847
-text = "Loader Extended"
+[node name="EmptySprite" type="Sprite" parent="WeaponStatusGroup"]
+texture = ExtResource( 26 )
+
+[node name="ExtendedSprite" type="Sprite" parent="WeaponStatusGroup"]
+texture = ExtResource( 22 )
+
+[node name="RetractedSprite" type="Sprite" parent="WeaponStatusGroup"]
+texture = ExtResource( 23 )
+
+[node name="StatusLabelParent" type="Node2D" parent="WeaponStatusGroup"]
+position = Vector2( -230, 125 )
+rotation = -0.0436332
+
+[node name="StatusLabel" type="Label" parent="WeaponStatusGroup/StatusLabelParent"]
+margin_right = 335.0
+margin_bottom = 16.0
+custom_fonts/font = ExtResource( 27 )
+custom_colors/font_color = Color( 0, 1, 0, 1 )
+text = "Weapon: Shell Loaded | Loader Extended"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="EmptyShellSprite" type="Sprite" parent="WeaponStatusGroup"]
-material = ExtResource( 9 )
-position = Vector2( 340, 190 )
-rotation = 0.174533
-scale = Vector2( 1.15, 1 )
-texture = ExtResource( 8 )
+[node name="KillSatisfactionGroup" type="Node2D" parent="."]
+position = Vector2( 560, -20 )
+script = ExtResource( 10 )
+happy_sprite_path = NodePath("HappySprite")
+neutral_sprite_path = NodePath("NeutralSprite")
+sad_sprite_path = NodePath("SadSprite")
 
-[node name="Label" type="Label" parent="WeaponStatusGroup/EmptyShellSprite"]
-margin_left = 20.7652
-margin_top = -6.60713
-margin_right = 100.765
-margin_bottom = 7.39287
-text = "Shell Packed"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="BorderSprite" type="Sprite" parent="KillSatisfactionGroup"]
+texture = ExtResource( 24 )
 
-[node name="AmmoLoadedSprite" type="Sprite" parent="WeaponStatusGroup"]
-material = ExtResource( 9 )
-position = Vector2( 337.496, 230.135 )
-rotation = 0.174533
-scale = Vector2( 1.15, 1 )
-texture = ExtResource( 8 )
+[node name="HappySprite" type="Sprite" parent="KillSatisfactionGroup"]
+visible = false
+texture = ExtResource( 20 )
 
-[node name="Label" type="Label" parent="WeaponStatusGroup/AmmoLoadedSprite"]
-margin_left = 21.0012
-margin_top = -5.89922
-margin_right = 102.001
-margin_bottom = 8.10078
-text = "Shell Loaded"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="NeutralSprite" type="Sprite" parent="KillSatisfactionGroup"]
+texture = ExtResource( 25 )
+
+[node name="SadSprite" type="Sprite" parent="KillSatisfactionGroup"]
+visible = false
+texture = ExtResource( 19 )
 
 [node name="CommsPanel" type="Node2D" parent="."]
-position = Vector2( -0.594601, -271.352 )
+position = Vector2( 0, -271.352 )
 script = ExtResource( 12 )
 comms_message_scene = ExtResource( 14 )
 pilot_response_scene = ExtResource( 13 )
 response_scene = ExtResource( 15 )
-comms_parent_path = NodePath("PanelContainer/VSplitContainer/ScrollContainer/VBoxContainer")
-comms_scroll_box_path = NodePath("PanelContainer/VSplitContainer/ScrollContainer")
-response_parent_path = NodePath("PanelContainer/VSplitContainer/HBoxContainer")
+comms_parent_path = NodePath("CommsSplit/MessageContainer/MessageVBox")
+comms_scroll_box_path = NodePath("CommsSplit/MessageContainer")
+response_parent_path = NodePath("CommsSplit/ResponseContainer")
 
-[node name="PanelContainer" type="PanelContainer" parent="CommsPanel"]
-margin_left = -400.0
-margin_top = -200.0
-margin_right = 400.0
-margin_bottom = 200.0
+[node name="CommsSplit" type="VBoxContainer" parent="CommsPanel"]
+margin_left = -584.0
+margin_top = -204.0
+margin_right = 241.0
+margin_bottom = 155.0
+theme = ExtResource( 9 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="VSplitContainer" type="VBoxContainer" parent="CommsPanel/PanelContainer"]
-margin_left = 7.0
-margin_top = 7.0
-margin_right = 793.0
-margin_bottom = 393.0
-
-[node name="ScrollContainer" type="ScrollContainer" parent="CommsPanel/PanelContainer/VSplitContainer"]
-margin_right = 786.0
-margin_bottom = 334.0
-rect_min_size = Vector2( 0, 325 )
+[node name="MessageContainer" type="ScrollContainer" parent="CommsPanel/CommsSplit"]
+margin_right = 825.0
+margin_bottom = 307.0
+rect_min_size = Vector2( 0, 300 )
 size_flags_vertical = 3
 scroll_horizontal_enabled = false
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CommsPanel/PanelContainer/VSplitContainer/ScrollContainer"]
-margin_right = 786.0
-margin_bottom = 334.0
+[node name="MessageVBox" type="VBoxContainer" parent="CommsPanel/CommsSplit/MessageContainer"]
+margin_right = 825.0
+margin_bottom = 307.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 alignment = 2
 
-[node name="CommsMessage" parent="CommsPanel/PanelContainer/VSplitContainer/ScrollContainer/VBoxContainer" instance=ExtResource( 14 )]
-visible = false
-margin_top = 228.0
-margin_bottom = 279.0
+[node name="HSeparator" type="HSeparator" parent="CommsPanel/CommsSplit"]
+margin_top = 311.0
+margin_right = 825.0
+margin_bottom = 315.0
 
-[node name="PilotResponse" parent="CommsPanel/PanelContainer/VSplitContainer/ScrollContainer/VBoxContainer" instance=ExtResource( 13 )]
-visible = false
-margin_top = 283.0
-margin_bottom = 334.0
-
-[node name="HSeparator" type="HSeparator" parent="CommsPanel/PanelContainer/VSplitContainer"]
-margin_top = 338.0
-margin_right = 786.0
-margin_bottom = 342.0
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CommsPanel/PanelContainer/VSplitContainer"]
-margin_top = 346.0
-margin_right = 786.0
-margin_bottom = 386.0
+[node name="ResponseContainer" type="HBoxContainer" parent="CommsPanel/CommsSplit"]
+margin_top = 319.0
+margin_right = 825.0
+margin_bottom = 359.0
 rect_min_size = Vector2( 0, 40 )
 custom_constants/separation = 12
 alignment = 2
 
-[node name="ReponseButton" parent="CommsPanel/PanelContainer/VSplitContainer/HBoxContainer" instance=ExtResource( 15 )]
-visible = false
-margin_left = 732.0
-margin_right = 786.0
-
 [node name="BackBufferCopy" type="BackBufferCopy" parent="."]
+material = ExtResource( 18 )
 copy_mode = 2
 rect = Rect2( -960, -540, 1920, 1080 )
 
 [node name="GlitchCover" type="ColorRect" parent="BackBufferCopy"]
-material = ExtResource( 16 )
-margin_left = -388.362
-margin_top = -462.412
-margin_right = 394.638
-margin_bottom = -78.4117
+material = SubResource( 2 )
+margin_left = -584.0
+margin_top = -476.0
+margin_right = 240.0
+margin_bottom = -116.0
 mouse_filter = 2
 script = ExtResource( 17 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-glitch_material = ExtResource( 16 )
+glitch_material = SubResource( 2 )
+
+[node name="BoomFade" type="ColorRect" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -960.0
+margin_top = -540.0
+margin_right = 960.0
+margin_bottom = 540.0
+__meta__ = {
+"_edit_use_anchors_": false
+}

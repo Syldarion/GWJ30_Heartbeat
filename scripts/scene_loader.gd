@@ -2,14 +2,21 @@ extends Node
 
 signal scene_loaded
 
+var transition_scene = preload("res://scenes/SceneTransition.tscn")
+
 var loader
-var wait_frames
+var wait_time
 var time_max = 100
 var current_scene = null
+var transition_node
+var transition_anim
 
 func _ready():
 	var root = get_tree().get_root()
 	current_scene = root.get_child(root.get_child_count() - 1)
+	transition_node = transition_scene.instance()
+	add_child(transition_node)
+	transition_anim = transition_node.get_node("AnimationPlayer") as AnimationPlayer
 
 func load_scene(path):
 	loader = ResourceLoader.load_interactive(path)
@@ -22,17 +29,15 @@ func load_scene(path):
 	
 	current_scene.queue_free()
 	
-	# start loading bar?
-	
-	wait_frames = 1
+	wait_time = 1.0
 
 func _process(time):
 	if loader == null:
 		set_process(false)
 		return
 	
-	if wait_frames > 0:
-		wait_frames -= 1
+	if wait_time > 0.0:
+		wait_time -= time
 		return
 	
 	var t = OS.get_ticks_msec()
@@ -61,6 +66,10 @@ func update_progress():
 	# update progress bar
 
 func set_new_scene(scene_resource):
+	transition_anim.play("Fade")
+	yield(transition_anim, "animation_finished")
 	current_scene = scene_resource.instance()
 	get_node("/root").add_child(current_scene)
 	emit_signal("scene_loaded")
+	transition_anim.play_backwards("Fade")
+	yield(transition_anim, "animation_finished")

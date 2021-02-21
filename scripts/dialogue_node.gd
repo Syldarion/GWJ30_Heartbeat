@@ -21,8 +21,8 @@ func add_line(speaker: String, line: String, wait: float):
 func add_built_link(link: DialogueLink):
 	links.append(link)
 
-func add_link(text: String, linked_node: DialogueNode):
-	var new_link = DialogueLink.new(text, linked_node)
+func add_link(text: String, linked_node: DialogueNode, auto = false):
+	var new_link = DialogueLink.new(text, linked_node, auto)
 	links.append(new_link)
 	return new_link
 

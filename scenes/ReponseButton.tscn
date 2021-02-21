@@ -1,11 +1,13 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://fonts/officecodepro_regular_panel.tres" type="DynamicFont" id=1]
 [ext_resource path="res://scripts/response_button.gd" type="Script" id=2]
+[ext_resource path="res://themes/mech_theme.tres" type="Theme" id=3]
 
 [node name="ReponseButton" type="Button"]
 margin_right = 54.0
 margin_bottom = 40.0
+theme = ExtResource( 3 )
 custom_fonts/font = ExtResource( 1 )
 text = "Yes"
 script = ExtResource( 2 )

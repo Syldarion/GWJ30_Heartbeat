@@ -6,12 +6,19 @@ const NM_BOSS = "Captain Richardson"
 const NM_PILOT = "Pilot"
 const NM_RESIST = "CIR-C3"
 
+const SP_MECH = 24.0
+const SP_BOSS = 12.0
+const SP_RESIST = 12.0
+
 var level_name
 
 var cockpit_ref
 var comms_ref
 var manager_ref
 var glitch_ref
+var weapons_ref
+var satisfaction_ref
+var sensor_ref
 
 func _init():
 	level_name = "NONE"
@@ -36,7 +43,7 @@ func run_node(dialogue_node: DialogueNode) -> DialogueNode:
 	return yield(dialogue_node, "node_completed")
 
 func run_line(dialogue_line: DialogueLine):
-	yield(manager_ref.get_tree().create_timer(dialogue_line.wait), "timeout")
+	yield(manager_ref.get_tree().create_timer(dialogue_line.get_wait()), "timeout")
 	var item_ref = comms_ref.print_message(dialogue_line.speaker, dialogue_line.line)
 	dialogue_line.send_line(item_ref)
 	if dialogue_line.has_exec:
@@ -48,7 +55,7 @@ func run_level_script():
 
 func glitch_message(line_item_ref, time_in):
 	var start_time = OS.get_ticks_msec()
-	var message_text = line_item_ref.get_node("VBoxContainer/Label") as Label
+	var message_text = line_item_ref.get_node("VBoxContainer") as Control
 	glitch_ref.set_rect(message_text.rect_global_position, message_text.rect_size)
 	var time_diff = 0.0
 	while time_diff < time_in:
@@ -58,10 +65,11 @@ func glitch_message(line_item_ref, time_in):
 
 func unglitch_message(line_item_ref, time_out):
 	var start_time = OS.get_ticks_msec()
-	# var line_control = line_item_ref as Control
-	# glitch_ref.set_rect(line_control.rect_global_position, line_control.rect_size)
 	var time_diff = 0.0
 	while time_diff < time_out:
 		glitch_ref.set_glitch_percentage(1.0 - time_diff / time_out)
 		yield(manager_ref.get_tree(), "idle_frame")
 		time_diff = (OS.get_ticks_msec() - start_time) / 1000.0
+
+func wait(time):
+	yield(manager_ref.get_tree().create_timer(time), "timeout")

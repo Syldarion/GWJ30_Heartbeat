@@ -1,34 +1,47 @@
+class_name WeaponStatus
 extends Node
 
-class_name WeaponStatus
+export(NodePath) var shell_sprite_path
+export(NodePath) var loader_sprite_path
+export(NodePath) var empty_sprite_path
+export(NodePath) var extended_sprite_path
+export(NodePath) var retracted_sprite_path
+export(NodePath) var status_label_path
 
-export(NodePath) var loader_status_path
-export(NodePath) var empty_shell_path
-export(NodePath) var ammo_loaded_path
-
-export(Material) var active_mat
-export(Material) var inactive_mat
-
-onready var loader_status = get_node(loader_status_path) as Sprite
-onready var empty_shell = get_node(empty_shell_path) as Sprite
-onready var ammo_loaded = get_node(ammo_loaded_path) as Sprite
+onready var shell_sprite = get_node(shell_sprite_path) as Sprite
+onready var loader_sprite = get_node(loader_sprite_path) as Sprite
+onready var empty_sprite = get_node(empty_sprite_path) as Sprite
+onready var extended_sprite = get_node(extended_sprite_path) as Sprite
+onready var retracted_sprite = get_node(retracted_sprite_path) as Sprite
+onready var status_label = get_node(status_label_path) as Label
 
 
 func _ready():
 	pass
 
 func update_status(loader_retracted, shell_empty, shell_loaded):
+	var weapon_status = "Weapon Status: "
+	
+	if not shell_loaded:
+		shell_sprite.modulate = Color(1.0, 1.0, 1.0, 0.1)
+		empty_sprite.modulate = Color(1.0, 1.0, 1.0, 0.1)
+		weapon_status += "No Shell"
+	elif not shell_empty:
+		shell_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		empty_sprite.modulate = Color(1.0, 1.0, 1.0, 0.1)
+		weapon_status += "Shell Ready"
+	else:
+		shell_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		empty_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		weapon_status += "Shell Spent"
+	
 	if loader_retracted:
-		loader_status.material = inactive_mat
+		retracted_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		extended_sprite.modulate = Color(1.0, 1.0, 1.0, 0.1)
+		weapon_status += " | Loader Retracted"
 	else:
-		loader_status.material = active_mat
+		extended_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		retracted_sprite.modulate = Color(1.0, 1.0, 1.0, 0.1)
+		weapon_status += " | Loader Extended"
 	
-	if shell_empty:
-		empty_shell.material = inactive_mat
-	else:
-		empty_shell.material = active_mat
-	
-	if shell_loaded:
-		ammo_loaded.material = active_mat
-	else:
-		ammo_loaded.material = inactive_mat
+	status_label.text = weapon_status
